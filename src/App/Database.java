@@ -3,6 +3,7 @@ package App;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import com.mysql.cj.jdbc.Driver;
 
 public class Database {
     private static Connection conn;
@@ -17,7 +18,7 @@ public class Database {
                 String pass = "";
 
                 // Register JDBC driver
-                DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
+                DriverManager.registerDriver(new Driver());
 
                 // Membuat koneksi
                 conn = DriverManager.getConnection(url, user, pass);
