@@ -24,4 +24,11 @@ public class ShowtimeRepository {
         statement.executeUpdate();
     }
 
+    public Showtime update (Showtime showtime) throws SQLException {
+
+        PreparedStatement statement = this.connection.prepareStatement("UPDATE showtime SET Jam_Tayang = ? WHERE Film_ID = ? AND Studio_ID = ?");
+
+        return showtime;
+    }
+
 }
