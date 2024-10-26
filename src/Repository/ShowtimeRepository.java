@@ -71,7 +71,7 @@ public class ShowtimeRepository {
     }
 
     public Showtime[] findByStudioId(int studioId) throws SQLException {
-        String sql = "SELECT Showtime_ID,Film_ID,Studio_ID,Jam_Tayang FROM showtime WHERE Studio_ID = ?";
+        String sql = "SELECT Showtime_ID,Film_ID,Studio_ID,Jam_Tayang FROM showtime WHERE Studio_ID = ? ORDER BY Jam_Tayang ASC";
 
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
             statement.setInt(1, studioId);

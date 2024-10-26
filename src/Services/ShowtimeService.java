@@ -5,6 +5,7 @@ import Domain.Film;
 import Domain.Showtime;
 import Domain.Studio;
 import Model.CreateShowtimeRequest;
+import Model.RemoveShowtimeRequest;
 import Repository.FilmRepository;
 import Repository.ShowtimeRepository;
 import Repository.StudioRepository;
@@ -84,6 +85,61 @@ public class ShowtimeService {
         if (request.filmId == null || request.filmId < 0 || request.studioId == null || request.studioId < 0 || request.showtime == null) {
             throw new ValidationException("Film ID, Studio ID, and Showtime are required");
         }
+    }
+
+    public void sortShowtime(int studioId) throws ValidationException,SQLException {
+        try {
+            Database.beginTransaction();
+
+            Showtime[] showtimes = this.showtimeRepository.findByStudioId(studioId);
+
+            if (showtimes.length == 0) {
+                throw new ValidationException("No showtime found");
+            }
+
+            LocalTime nextAvailableTime = openingTime;
+
+            for (Showtime showtime : showtimes) {
+                Film film = this.filmRepository.findById(showtime.filmId);
+                LocalTime showtimeTime = LocalTime.parse(showtime.showtime, formatter);
+
+                if (showtimeTime.isBefore(nextAvailableTime)) {
+                    showtimeTime = nextAvailableTime;
+                }
+
+                showtime.showtime = showtimeTime.format(formatter);
+                nextAvailableTime = showtimeTime.plusMinutes(film.duration).plusMinutes(breakTimeMinutes);
+
+                this.showtimeRepository.update(showtime);
+            }
+
+            Database.commitTransaction();
+        }catch (SQLException e) {
+            Database.rollbackTransaction();
+            throw e;
+        }
+    }
+
+    public void remove(RemoveShowtimeRequest request) throws ValidationException, SQLException {
+        if(request.id == null || request.id < 0) {
+            throw new ValidationException("ID is required");
+        }
+
+        try{
+            Database.beginTransaction();
+
+            if(this.showtimeRepository.find(request.id) == null) {
+                throw new ValidationException("Showtime not found");
+            }
+
+            this.showtimeRepository.delete(request.id);
+
+            Database.commitTransaction();
+        }catch (SQLException e) {
+            Database.rollbackTransaction();
+            throw e;
+        }
+
     }
 
 }
