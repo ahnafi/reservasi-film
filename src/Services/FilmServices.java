@@ -2,10 +2,7 @@ package Services;
 
 import Config.Database;
 import Domain.Film;
-import Model.SaveFilmRequest;
-import Model.SaveFilmResponse;
-import Model.UpdateFilmRequest;
-import Model.UpdateFilmResponse;
+import Model.*;
 import Repository.FilmRepository;
 import Exception.ValidationException;
 
@@ -26,7 +23,7 @@ public class FilmServices {
             Database.beginTransaction();
 
             if (this.filmRepository.findById(request.id) != null) {
-                throw new ValidationException("Film dengan ID "+ request.id +" sudah ada");
+                throw new ValidationException("Film dengan ID " + request.id + " sudah ada");
             }
 
             Film newFilm = new Film();
@@ -53,14 +50,14 @@ public class FilmServices {
         }
     }
 
-    public UpdateFilmResponse update (UpdateFilmRequest request) throws ValidationException, SQLException {
+    public UpdateFilmResponse update(UpdateFilmRequest request) throws ValidationException, SQLException {
         validateUpdateFilmRequest(request);
 
         try {
             Database.beginTransaction();
 
             Film film = this.filmRepository.findById(request.id);
-            if(film == null) {
+            if (film == null) {
                 throw new ValidationException("Film tidak ditemukan");
             }
 
@@ -77,7 +74,7 @@ public class FilmServices {
             UpdateFilmResponse response = new UpdateFilmResponse();
             response.film = film;
             return response;
-        }catch (SQLException err){
+        } catch (SQLException err) {
             Database.rollbackTransaction();
             throw err;
         }
@@ -87,6 +84,27 @@ public class FilmServices {
     private void validateUpdateFilmRequest(UpdateFilmRequest request) throws ValidationException {
         if (request.title == null || request.title.isEmpty() || request.genre == null || request.genre.isEmpty() || request.duration < 0 || request.id < 0) {
             throw new ValidationException("Film id,Title , Genre and Duration are required");
+        }
+    }
+
+    public void delete(DeleteFilmRequest request) throws ValidationException, SQLException {
+        if(request.filmId < 0 ){
+            throw new ValidationException("film id tidak boleh kosong");
+        }
+
+        try{
+            Database.beginTransaction();
+
+            if (this.filmRepository.findById(request.filmId) == null) {
+                throw new ValidationException("Film tidak ditemukan");
+            }
+
+            this.filmRepository.deleteById(request.filmId);
+
+            Database.commitTransaction();
+        }catch (SQLException err){
+            Database.rollbackTransaction();
+            throw err;
         }
     }
 
