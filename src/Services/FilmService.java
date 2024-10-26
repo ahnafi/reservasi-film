@@ -8,15 +8,15 @@ import Exception.ValidationException;
 
 import java.sql.SQLException;
 
-public class FilmServices {
+public class FilmService {
 
     private final FilmRepository filmRepository;
 
-    public FilmServices(FilmRepository filmRepository) {
+    public FilmService(FilmRepository filmRepository) {
         this.filmRepository = filmRepository;
     }
 
-    public SaveFilmResponse save(SaveFilmRequest request) throws ValidationException, SQLException {
+    public SaveFilmResponse add(SaveFilmRequest request) throws ValidationException, SQLException {
         validateSaveFilm(request);
 
         try {

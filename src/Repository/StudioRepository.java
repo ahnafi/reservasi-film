@@ -15,7 +15,7 @@ public class StudioRepository {
         this.connection = conn;
     }
 
-    public void save(Studio studio) throws SQLException {
+    public Studio save(Studio studio) throws SQLException {
         String sql = "INSERT INTO studio (Studio_ID,Nama_Studio, Kapasitas) VALUES (? , ?, ?)";
 
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
@@ -23,6 +23,8 @@ public class StudioRepository {
             statement.setString(2, studio.name);
             statement.setInt(3, studio.capacity);
             statement.executeUpdate();
+
+            return studio;
         }
     }
 
