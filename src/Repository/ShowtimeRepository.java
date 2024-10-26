@@ -4,8 +4,8 @@ import Domain.Showtime;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class ShowtimeRepository {
 
@@ -16,19 +16,89 @@ public class ShowtimeRepository {
     }
 
     public void save(Showtime req) throws SQLException {
-        String sql = "INSERT INTO showtime ( Film_ID , Studio_ID , Jam_Tayang) VALUES (?,?,?)";
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setInt(1,req.filmId);
-        statement.setInt(2,req.studioId);
-        statement.setTime(3,req.showtime);
+        String sql = "INSERT INTO showtime (Film_ID, Studio_ID, Jam_Tayang) VALUES (?, ?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, req.filmId);
+            statement.setInt(2, req.studioId);
+            statement.setTime(3, req.showtime);
+            statement.executeUpdate();
+        }
+    }
+
+    public Showtime update(Showtime showtime) throws SQLException {
+        String sql = "UPDATE showtime SET Jam_Tayang = ? WHERE Film_ID = ? AND Studio_ID = ?";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
+            statement.setTime(1, showtime.showtime);
+            statement.setInt(2, showtime.filmId);
+            statement.setInt(3, showtime.studioId);
+
+            statement.executeUpdate();
+            return showtime;
+        }
+    }
+
+    public Showtime[] getAll() throws SQLException {
+        String sql = "SELECT Showtime_ID,Film_ID,Studio_ID,Jam_Tayang FROM showtime";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
+            ResultSet res = statement.executeQuery();
+
+            res.last();
+            int rowCount = res.getRow();
+            res.beforeFirst();
+
+            if(rowCount > 0) {
+                Showtime[] result = new Showtime[rowCount];
+                int i = 0;
+
+                while (res.next()) {
+                    Showtime showtime = new Showtime();
+                    showtime.id = res.getInt("Showtime_ID");
+                    showtime.filmId = res.getInt("Film_ID");
+                    showtime.studioId = res.getInt("Studio_ID");
+                    showtime.showtime = res.getTime("Jam_Tayang");
+
+                    result[i++] = showtime;
+                }
+
+                return result;
+            }else {
+                return new Showtime[0];
+            }
+        }
+    }
+
+    public Showtime find(int id) throws SQLException {
+        String sql = "SELECT Film_ID,Studio_ID,Jam_Tayang FROM showtime WHERE Showtime_ID = ?";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+
+            try (ResultSet res = statement.executeQuery()){
+                if (res.next()) {
+                    Showtime showtime = new Showtime();
+                    showtime.filmId = res.getInt("Film_ID");
+                    showtime.studioId = res.getInt("Studio_ID");
+                    showtime.showtime = res.getTime("Jam_Tayang");
+
+                    return showtime;
+                }else {
+                    return null;
+                }
+            }
+        }
+    }
+
+    public void delete(int id) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement("DELETE FROM showtime WHERE Showtime_ID = ?");
+        statement.setInt(1, id);
         statement.executeUpdate();
     }
 
-    public Showtime update (Showtime showtime) throws SQLException {
-
-        PreparedStatement statement = this.connection.prepareStatement("UPDATE showtime SET Jam_Tayang = ? WHERE Film_ID = ? AND Studio_ID = ?");
-
-        return showtime;
+    public void deleteAll() throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement("DELETE FROM showtime");
+        statement.executeUpdate();
     }
-
 }

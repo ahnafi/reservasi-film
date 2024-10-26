@@ -1,9 +1,8 @@
-package App;
+package Config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import com.mysql.cj.jdbc.Driver;
 
 public class Database {
     private static Connection conn;
@@ -13,14 +12,11 @@ public class Database {
         if (conn == null) {
             try {
                 // Menggunakan konfigurasi untuk koneksi database
-                String url = "jdbc:mysql://localhost:3306/nontonFilm";
+                String url = "jdbc:mysql://localhost:3306/nontonfilm";  // Pastikan nama database sesuai
                 String user = "root";
                 String pass = "";
 
-                // Register JDBC driver
-                DriverManager.registerDriver(new Driver());
-
-                // Membuat koneksi
+                // Membuat koneksi (tanpa register driver secara manual)
                 conn = DriverManager.getConnection(url, user, pass);
             } catch (SQLException e) {
                 System.out.println("Error database: " + e.getMessage());
@@ -32,7 +28,7 @@ public class Database {
     // Method untuk memulai transaksi
     public static void beginTransaction() {
         try {
-            if (conn != null) {
+            if (conn != null && !conn.isClosed()) {
                 conn.setAutoCommit(false);  // Menonaktifkan auto-commit
                 System.out.println("Transaksi dimulai.");
             } else {
@@ -46,7 +42,7 @@ public class Database {
     // Method untuk commit transaksi
     public static void commitTransaction() {
         try {
-            if (conn != null) {
+            if (conn != null && !conn.isClosed()) {
                 conn.commit();  // Melakukan commit
                 conn.setAutoCommit(true);  // Mengaktifkan kembali auto-commit
                 System.out.println("Transaksi berhasil di-commit.");
@@ -61,7 +57,7 @@ public class Database {
     // Method untuk rollback transaksi
     public static void rollbackTransaction() {
         try {
-            if (conn != null) {
+            if (conn != null && !conn.isClosed()) {
                 conn.rollback();  // Melakukan rollback
                 conn.setAutoCommit(true);  // Mengaktifkan kembali auto-commit
                 System.out.println("Transaksi di-rollback.");
@@ -70,6 +66,18 @@ public class Database {
             }
         } catch (SQLException e) {
             System.out.println("Gagal rollback transaksi: " + e.getMessage());
+        }
+    }
+
+    // Method untuk menutup koneksi
+    public static void closeConnection() {
+        try {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+                System.out.println("Koneksi ditutup.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Gagal menutup koneksi: " + e.getMessage());
         }
     }
 }
