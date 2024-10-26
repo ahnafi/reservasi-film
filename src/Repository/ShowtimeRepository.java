@@ -21,7 +21,7 @@ public class ShowtimeRepository {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, req.filmId);
             statement.setInt(2, req.studioId);
-            statement.setTime(3, req.showtime);
+            statement.setString(3, req.showtime);
             statement.executeUpdate();
         }
     }
@@ -30,7 +30,7 @@ public class ShowtimeRepository {
         String sql = "UPDATE showtime SET Jam_Tayang = ? WHERE Film_ID = ? AND Studio_ID = ?";
 
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
-            statement.setTime(1, showtime.showtime);
+            statement.setString(1, showtime.showtime);
             statement.setInt(2, showtime.filmId);
             statement.setInt(3, showtime.studioId);
 
@@ -58,7 +58,39 @@ public class ShowtimeRepository {
                     showtime.id = res.getInt("Showtime_ID");
                     showtime.filmId = res.getInt("Film_ID");
                     showtime.studioId = res.getInt("Studio_ID");
-                    showtime.showtime = res.getTime("Jam_Tayang");
+                    showtime.showtime = res.getString("Jam_Tayang");
+
+                    result[i++] = showtime;
+                }
+
+                return result;
+            }else {
+                return new Showtime[0];
+            }
+        }
+    }
+
+    public Showtime[] findByStudioId(int studioId) throws SQLException {
+        String sql = "SELECT Showtime_ID,Film_ID,Studio_ID,Jam_Tayang FROM showtime WHERE Studio_ID = ?";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
+            statement.setInt(1, studioId);
+            ResultSet res = statement.executeQuery();
+
+            res.last();
+            int rowCount = res.getRow();
+            res.beforeFirst();
+
+            if(rowCount > 0) {
+                Showtime[] result = new Showtime[rowCount];
+                int i = 0;
+
+                while (res.next()) {
+                    Showtime showtime = new Showtime();
+                    showtime.id = res.getInt("Showtime_ID");
+                    showtime.filmId = res.getInt("Film_ID");
+                    showtime.studioId = res.getInt("Studio_ID");
+                    showtime.showtime = res.getString("Jam_Tayang");
 
                     result[i++] = showtime;
                 }
@@ -81,7 +113,7 @@ public class ShowtimeRepository {
                     Showtime showtime = new Showtime();
                     showtime.filmId = res.getInt("Film_ID");
                     showtime.studioId = res.getInt("Studio_ID");
-                    showtime.showtime = res.getTime("Jam_Tayang");
+                    showtime.showtime = res.getString("Jam_Tayang");
 
                     return showtime;
                 }else {
