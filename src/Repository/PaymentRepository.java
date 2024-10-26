@@ -14,15 +14,22 @@ public class PaymentRepository {
         this.connection = connection;
     }
 
-    public void save(Payment payment) throws SQLException {
+    public Payment save(Payment payment) throws SQLException {
         String sql = "INSERT INTO payment (Reservation_ID, Amount, Payment_Date, Status) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, payment.reservationId);
             statement.setBigDecimal(2, payment.amount);
-            statement.setDate(3, new java.sql.Date(payment.paymentDate.getTime()));
+            statement.setString(3, payment.paymentDate );
             statement.setString(4, payment.status);
 
             statement.executeUpdate();
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    payment.id = generatedKeys.getInt(1);
+                    return payment;
+                }
+            }
         }
     }
 
@@ -31,7 +38,7 @@ public class PaymentRepository {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, payment.reservationId);
             statement.setBigDecimal(2, payment.amount);
-            statement.setDate(3, new java.sql.Date(payment.paymentDate.getTime()));
+            statement.setString(3, payment.paymentDate);
             statement.setString(4, payment.status);
             statement.setInt(5, payment.id);
 
@@ -50,7 +57,7 @@ public class PaymentRepository {
                     payment.id = rs.getInt("Payment_ID");
                     payment.reservationId = rs.getInt("Reservation_ID");
                     payment.amount = rs.getBigDecimal("Amount");
-                    payment.paymentDate = rs.getDate("Payment_Date");
+                    payment.paymentDate = rs.getString("Payment_Date");
                     payment.status = rs.getString("Status");
                     return payment;
                 } else {
@@ -77,7 +84,7 @@ public class PaymentRepository {
                     payment.id = rs.getInt("Payment_ID");
                     payment.reservationId = rs.getInt("Reservation_ID");
                     payment.amount = rs.getBigDecimal("Amount");
-                    payment.paymentDate = rs.getDate("Payment_Date");
+                    payment.paymentDate = rs.getString("Payment_Date");
                     payment.status = rs.getString("Status");
 
                     result[i++] = payment;

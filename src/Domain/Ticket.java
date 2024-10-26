@@ -6,5 +6,5 @@ public class Ticket {
     public Integer id = null;
     public int reservationId;
     public String chairNumber;
-    public Date purchaseDate;
+    public String purchaseDate;
 }

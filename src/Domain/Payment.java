@@ -7,6 +7,6 @@ public class Payment {
     public Integer id = null;
     public int reservationId;
     public BigDecimal amount;
-    public Date paymentDate;
+    public String paymentDate;
     public String status = PaymentStatus.Pending.toString() ;
 }

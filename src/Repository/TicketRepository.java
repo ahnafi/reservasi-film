@@ -19,7 +19,7 @@ public class TicketRepository {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, ticket.reservationId);
             statement.setString(2, ticket.chairNumber);
-            statement.setDate(3, new java.sql.Date(ticket.purchaseDate.getTime()));
+            statement.setString(3, ticket.purchaseDate);
 
             statement.executeUpdate();
         }
@@ -31,7 +31,7 @@ public class TicketRepository {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, ticket.reservationId);
             statement.setString(2, ticket.chairNumber);
-            statement.setDate(3, new java.sql.Date(ticket.purchaseDate.getTime()));
+            statement.setString(3, ticket.purchaseDate );
             statement.setInt(4, ticket.id);
 
             statement.executeUpdate();
@@ -51,7 +51,7 @@ public class TicketRepository {
                     ticket.id = rs.getInt("Ticket_ID");
                     ticket.reservationId = rs.getInt("Reservation_ID");
                     ticket.chairNumber = rs.getString("Nomor_Kursi");
-                    ticket.purchaseDate = rs.getDate("Purchase_Date");
+                    ticket.purchaseDate = rs.getString("Purchase_Date");
 
                     return ticket;
                 } else {
@@ -73,7 +73,7 @@ public class TicketRepository {
                 ticket.id = rs.getInt("Ticket_ID");
                 ticket.reservationId = rs.getInt("Reservation_ID");
                 ticket.chairNumber = rs.getString("Nomor_Kursi");
-                ticket.purchaseDate = rs.getDate("Purchase_Date");
+                ticket.purchaseDate = rs.getString("Purchase_Date");
 
                 tickets.add(ticket);
             }
