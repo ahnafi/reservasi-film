@@ -14,17 +14,20 @@ public class FilmRepository {
         this.conn = conn;
     }
 
-    public void save(Film data) throws SQLException {
-        String sql = "INSERT INTO film (Judul, Genre, Durasi) VALUES (?, ?, ?)";
+    public Film save(Film data) throws SQLException {
+        String sql = "INSERT INTO film (Film_ID,Judul, Genre, Durasi) VALUES (?,?, ?, ?)";
 
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, data.title);
-            statement.setString(2, data.genre);
-            statement.setInt(3, data.duration);
+            statement.setInt(1,data.id);
+            statement.setString(2, data.title);
+            statement.setString(3, data.genre);
+            statement.setInt(4, data.duration);
 
             // Eksekusi query
             statement.executeUpdate();
         }
+
+        return data;
     }
 
     public Film update(Film film) throws SQLException {

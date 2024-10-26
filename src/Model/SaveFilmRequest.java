@@ -1,6 +1,6 @@
-package Domain;
+package Model;
 
-public class Film {
+public class SaveFilmRequest {
     public int id;
     public String title;
     public String genre;

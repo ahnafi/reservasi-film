@@ -16,17 +16,18 @@ public class StudioRepository {
     }
 
     public void save(Studio studio) throws SQLException {
-        String sql = "INSERT INTO studio (Nama_Studio, Kapasitas) VALUES (?, ?)";
+        String sql = "INSERT INTO studio (Studio_ID,Nama_Studio, Kapasitas) VALUES (? , ?, ?)";
 
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
-            statement.setString(1, studio.name);
-            statement.setInt(2, studio.capacity);
+            statement.setInt(1,studio.id);
+            statement.setString(2, studio.name);
+            statement.setInt(3, studio.capacity);
             statement.executeUpdate();
         }
     }
 
     public Studio update(Studio studio) throws SQLException {
-        String sql = "UPDATE studio SET Nama_Studio = ?, Kapasitas = ? WHERE ID = ?";
+        String sql = "UPDATE studio SET Nama_Studio = ?, Kapasitas = ? WHERE Studio_ID = ?";
 
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
             statement.setString(1, studio.name);

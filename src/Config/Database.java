@@ -7,16 +7,13 @@ import java.sql.SQLException;
 public class Database {
     private static Connection conn;
 
-    // Method untuk mendapatkan koneksi ke database
     public static Connection getConnection() {
         if (conn == null) {
             try {
-                // Menggunakan konfigurasi untuk koneksi database
-                String url = "jdbc:mysql://localhost:3306/nontonfilm";  // Pastikan nama database sesuai
+                String url = "jdbc:mysql://localhost:3306/nontonfilm";
                 String user = "root";
                 String pass = "";
 
-                // Membuat koneksi (tanpa register driver secara manual)
                 conn = DriverManager.getConnection(url, user, pass);
             } catch (SQLException e) {
                 System.out.println("Error database: " + e.getMessage());
@@ -25,7 +22,6 @@ public class Database {
         return conn;
     }
 
-    // Method untuk memulai transaksi
     public static void beginTransaction() {
         try {
             if (conn != null && !conn.isClosed()) {
@@ -39,7 +35,6 @@ public class Database {
         }
     }
 
-    // Method untuk commit transaksi
     public static void commitTransaction() {
         try {
             if (conn != null && !conn.isClosed()) {
@@ -54,7 +49,6 @@ public class Database {
         }
     }
 
-    // Method untuk rollback transaksi
     public static void rollbackTransaction() {
         try {
             if (conn != null && !conn.isClosed()) {
@@ -69,7 +63,6 @@ public class Database {
         }
     }
 
-    // Method untuk menutup koneksi
     public static void closeConnection() {
         try {
             if (conn != null && !conn.isClosed()) {
