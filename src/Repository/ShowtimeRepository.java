@@ -92,7 +92,8 @@ public class ShowtimeRepository {
                     showtime.studioId = res.getInt("Studio_ID");
                     showtime.showtime = res.getString("Jam_Tayang");
 
-                    result[i++] = showtime;
+                    result[i] = showtime;
+                    i++;
                 }
 
                 return result;
