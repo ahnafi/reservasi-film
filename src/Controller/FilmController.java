@@ -29,7 +29,7 @@ public class FilmController {
             Film[] films = response.films;
 
 //        gunakan view objek untuk menampilkan semua films
-//
+//        gunakan looping untuk menampilkan semua films
 //        for (Film film : films) {
 //        System.out.println(film.id + " " + film.title + " " + film.genre + " " + film.duration);
         } catch (SQLException err) {

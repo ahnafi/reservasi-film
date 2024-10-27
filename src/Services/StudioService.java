@@ -110,4 +110,11 @@ public class StudioService {
         }
 
     }
+
+    public FindAllStudioResponse showAll() throws SQLException {
+        Studio[] studios = this.studioRepository.findAll();
+        FindAllStudioResponse response = new FindAllStudioResponse();
+        response.studios = studios;
+        return response;
+    }
 }

@@ -62,6 +62,37 @@ public class StudioRepository {
         }
     }
 
+    public Studio[] findAll() throws SQLException {
+        String sql = "SELECT Studio_ID, Nama_Studio, Kapasitas FROM studio";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(sql);
+             ResultSet res = statement.executeQuery()) {
+
+            res.last();
+            int rowCount = res.getRow();
+            res.beforeFirst();
+
+            if (rowCount > 0) {
+                Studio[] result = new Studio[rowCount];
+                int i = 0;
+
+                while (res.next()) {
+                    Studio studio = new Studio();
+                    studio.id = res.getInt("Studio_ID");
+                    studio.name = res.getString("Nama_Studio");
+                    studio.capacity = res.getInt("Kapasitas");
+
+                    result[i] = studio;
+                    i++;
+                }
+
+                return result;
+            } else {
+                return new Studio[0];
+            }
+        }
+    }
+
     public void delete(Integer id) throws SQLException {
         String sql = "DELETE FROM studio WHERE Studio_ID = ?";
 

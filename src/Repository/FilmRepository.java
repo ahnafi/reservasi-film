@@ -64,7 +64,8 @@ public class FilmRepository {
                     film.genre = rs.getString("Genre");
                     film.duration = rs.getInt("Durasi");
 
-                    result[i++] = film;
+                    result[i] = film;
+                    i++;
                 }
 
                 return result;
