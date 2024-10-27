@@ -131,12 +131,23 @@ public class ShowtimeService {
         }
 
         Showtime[] showtimes = this.showtimeRepository.findByStudioId(StudioId);
+        int chairCapacity = this.studioRepository.find(StudioId).capacity;
+
+        FindAllShowtimeResponse request = new FindAllShowtimeResponse();
+        request.showtimes = showtimes;
+        request.chairCapacity = chairCapacity;
+
+        return request;
+
+    }
+
+    public FindAllShowtimeResponse getAllShowtimes() throws SQLException {
+        Showtime[] showtimes = this.showtimeRepository.getAll();
 
         FindAllShowtimeResponse request = new FindAllShowtimeResponse();
         request.showtimes = showtimes;
 
         return request;
-
     }
 
     public void remove(RemoveShowtimeRequest request) throws ValidationException, SQLException {
