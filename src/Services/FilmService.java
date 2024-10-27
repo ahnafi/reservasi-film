@@ -88,11 +88,11 @@ public class FilmService {
     }
 
     public void delete(DeleteFilmRequest request) throws ValidationException, SQLException {
-        if(request.filmId < 0 ){
+        if (request.filmId < 0) {
             throw new ValidationException("film id tidak boleh kosong");
         }
 
-        try{
+        try {
             Database.beginTransaction();
 
             if (this.filmRepository.findById(request.filmId) == null) {
@@ -102,10 +102,21 @@ public class FilmService {
             this.filmRepository.deleteById(request.filmId);
 
             Database.commitTransaction();
-        }catch (SQLException err){
+        } catch (SQLException err) {
             Database.rollbackTransaction();
             throw err;
         }
+    }
+
+    public FindAllFilmResponse showAll() throws SQLException {
+
+        Film[] films = this.filmRepository.findAll();
+
+        FindAllFilmResponse response = new FindAllFilmResponse();
+        response.films = films;
+
+        return response;
+
     }
 
 }
