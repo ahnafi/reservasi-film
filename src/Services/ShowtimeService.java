@@ -85,7 +85,7 @@ public class ShowtimeService {
         }
     }
 
-    public void sortShowtime(int studioId) throws ValidationException, SQLException {
+    public void sortShowtime(int studioId) throws SQLException, ValidationException {
         if (studioId < 0) {
             throw new ValidationException("Studio ID is required");
         }

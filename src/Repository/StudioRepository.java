@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StudioRepository {
 
@@ -68,28 +70,18 @@ public class StudioRepository {
         try (PreparedStatement statement = this.connection.prepareStatement(sql);
              ResultSet res = statement.executeQuery()) {
 
-            res.last();
-            int rowCount = res.getRow();
-            res.beforeFirst();
+            List <Studio> studios = new ArrayList<Studio>();
 
-            if (rowCount > 0) {
-                Studio[] result = new Studio[rowCount];
-                int i = 0;
+            while (res.next()) {
+                Studio studio = new Studio();
+                studio.id = res.getInt("Studio_ID");
+                studio.name = res.getString("Nama_Studio");
+                studio.capacity = res.getInt("Kapasitas");
 
-                while (res.next()) {
-                    Studio studio = new Studio();
-                    studio.id = res.getInt("Studio_ID");
-                    studio.name = res.getString("Nama_Studio");
-                    studio.capacity = res.getInt("Kapasitas");
+                studios.add(studio);
 
-                    result[i] = studio;
-                    i++;
-                }
-
-                return result;
-            } else {
-                return new Studio[0];
             }
+            return studios.toArray(new Studio[0]);
         }
     }
 

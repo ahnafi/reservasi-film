@@ -72,7 +72,6 @@ public class ShowtimeRepository {
             statement.setInt(1, studioId);
             ResultSet res = statement.executeQuery();
 
-            // Menggunakan ArrayList untuk fleksibilitas ukuran
             List<Showtime> showtimeList = new ArrayList<>();
 
             while (res.next()) {
@@ -82,10 +81,9 @@ public class ShowtimeRepository {
                 showtime.studioId = res.getInt("Studio_ID");
                 showtime.showtime = res.getString("Jam_Tayang");
 
-                showtimeList.add(showtime);  // Tambah ke list
+                showtimeList.add(showtime);
             }
 
-            // Mengonversi ArrayList ke array Showtime[]
             return showtimeList.toArray(new Showtime[0]);
         }
     }

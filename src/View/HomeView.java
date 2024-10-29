@@ -22,7 +22,10 @@ import java.sql.SQLException;
 public class HomeView extends JFrame {
     private JTable filmTable;
     private DefaultTableModel tableModel;
-    private JButton btnEdit, btnDelete;
+    private JButton btnDelete, btnAddShowtime, btnSortShowtime;
+    private JButton btnShowFilmView;
+    private JButton btnShowStudioView;
+    private JButton btnShowReservationView;
 
     private ShowtimeService showtimeService;
 
@@ -33,161 +36,153 @@ public class HomeView extends JFrame {
         StudioRepository studioRepository = new StudioRepository(connection);
         this.showtimeService = new ShowtimeService(showtimeRepository, filmRepository, studioRepository);
 
-        setTitle("");
+        setTitle("Showtime Film");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        tableModel = new DefaultTableModel(new String[]{"ID", "ID Film", "ID Studio","Showtime"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"ID", "ID Film", "ID Studio", "Showtime"}, 0);
         filmTable = new JTable(tableModel);
 
-        home();
+        showtime();
 
         JPanel buttonPanel = new JPanel();
-        btnEdit = new JButton("Edit Selected Film");
-        btnDelete = new JButton("Delete Selected Film");
 
-        buttonPanel.add(btnEdit);
+        btnDelete = new JButton("Delete Selected Showtime");
+        btnAddShowtime = new JButton("Add Showtime");
+        btnSortShowtime = new JButton("Sort Showtime");
+        btnShowReservationView = new JButton("Open Reservation View");
+
+        btnShowFilmView = new JButton("Show Film List");
+        btnShowStudioView = new JButton("Show Studio List");
+
+        buttonPanel.add(btnShowFilmView);
+        buttonPanel.add(btnShowStudioView);
+        buttonPanel.add(btnShowReservationView);
+
+        btnShowFilmView.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                FilmView filmView = new FilmView();
+                filmView.setVisible(true);
+            }
+        });
+
+        btnShowStudioView.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                StudioView studioView = new StudioView();
+                studioView.setVisible(true);
+            }
+        });
+
+        btnShowReservationView.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ReservationView reservationView = new ReservationView();
+                reservationView.setVisible(true);
+            }
+        });
+
+        buttonPanel.add(btnAddShowtime);
+        buttonPanel.add(btnSortShowtime);
         buttonPanel.add(btnDelete);
 
-        // Menambahkan tabel ke dalam JScrollPane
         JScrollPane scrollPane = new JScrollPane(filmTable);
 
-        // Menambahkan listener untuk tombol Delete
         btnDelete.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selectedRow = filmTable.getSelectedRow();
-                if (selectedRow != -1) {
-                    tableModel.removeRow(selectedRow);
-                    JOptionPane.showMessageDialog(null, "Film deleted successfully!");
-                } else {
-                    JOptionPane.showMessageDialog(null, "Please select a film to delete.");
-                }
+                removeShowtime();
             }
         });
 
-        // Menambahkan listener untuk tombol Edit
-        btnEdit.addActionListener(new ActionListener() {
+        btnAddShowtime.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selectedRow = filmTable.getSelectedRow();
-                if (selectedRow != -1) {
-                    String filmId = (String) tableModel.getValueAt(selectedRow, 0);
-                    String filmTitle = (String) tableModel.getValueAt(selectedRow, 1);
-                    String filmDirector = (String) tableModel.getValueAt(selectedRow, 2);
-
-                    // Contoh logika untuk mengedit film yang dipilih
-                    String newTitle = JOptionPane.showInputDialog("Edit Title:", filmTitle);
-                    String newDirector = JOptionPane.showInputDialog("Edit Director:", filmDirector);
-
-                    if (newTitle != null && newDirector != null) {
-                        tableModel.setValueAt(newTitle, selectedRow, 1);
-                        tableModel.setValueAt(newDirector, selectedRow, 2);
-                        JOptionPane.showMessageDialog(null, "Film updated successfully!");
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Please select a film to edit.");
-                }
+                addShowtime();
             }
         });
 
-        // Mengatur layout dan menambahkan komponen
+        btnSortShowtime.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sortShowtime();
+            }
+        });
+
         add(scrollPane, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public void home (){
+    public void showtime() {
         try {
-
             FindAllShowtimeResponse response = this.showtimeService.getAllShowtimes();
-
-            if(response.showtimes == null){
-                JOptionPane.showMessageDialog(null, "No Showtimes found!");
-                return;
+            for (Showtime data : response.showtimes) {
+                tableModel.addRow(new Object[]{data.id, data.filmId, data.studioId, data.showtime});
             }
-
-            for(Showtime data : response.showtimes){
-                tableModel.addRow(new Object[]{data.id,data.filmId,data.studioId,data.showtime});
-            }
-
-        }catch (SQLException err) {
-            JOptionPane.showMessageDialog(null,"error" + err.getMessage());
+        } catch (SQLException err) {
+            JOptionPane.showMessageDialog(null, "Error: " + err.getMessage());
         }
     }
 
-
     public void addShowtime() {
         try {
-            int filmId = 0;
-            int studioId = 0;
-
-//            view input form for filmId and studioId
-//            filmId = inputFilmId();
-//            studioId = inputStudioId();
-//            lalu masukan ke variabel di atas
+            int filmId = Integer.parseInt(JOptionPane.showInputDialog("Enter Film ID:"));
+            int studioId = Integer.parseInt(JOptionPane.showInputDialog("Enter Studio ID:"));
 
             CreateShowtimeRequest request = new CreateShowtimeRequest();
             request.filmId = filmId;
             request.studioId = studioId;
 
             this.showtimeService.create(request);
-
-//            view success message alert atau tampilan
-//            System.out.println("Showtime added successfully");
+            JOptionPane.showMessageDialog(null, "Showtime added successfully!");
 
         } catch (ValidationException | SQLException e) {
-//            view error message alert atau tampilan
-            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Invalid input format. Please enter valid numbers for IDs.");
         }
     }
 
-    public void updateShowtime() {
+    public void sortShowtime() {
         try {
-            int studioId = 0;
-//        tombol sort showtime untuk mereset jam tayang berdasarkan studioId
+            int studioId = Integer.parseInt(JOptionPane.showInputDialog("Enter Studio ID to Sort Showtimes:"));
 
             this.showtimeService.sortShowtime(studioId);
-
-//            view success message alert atau tampilan
-//            System.out.println("Showtime updated successfully");
-
-//            tampilakan jam tayang yang sudah diurutkan
+            JOptionPane.showMessageDialog(null, "Showtimes updated and sorted successfully!");
 
             FindAllShowtimeResponse response = this.showtimeService.getShowtimes(studioId);
-//            tampilkan dalam bentuk list atau tabel , dengan view
-//            System.out.println("Showtimes:");
-//            for (Showtime showtime : response.showtimes) {
-//                System.out.println(showtime.showtime);
-//            }
+            tableModel.setRowCount(0);
 
+            for (Showtime showtime : response.showtimes) {
+                tableModel.addRow(new Object[]{showtime.id, showtime.filmId, showtime.studioId, showtime.showtime});
+            }
 
-        }catch (ValidationException | SQLException e){
-//            view error message alert atau tampilan
-            System.out.println(e.getMessage());
+        } catch (ValidationException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Invalid input format. Please enter a valid number for Studio ID.");
         }
     }
 
     public void removeShowtime() {
-        try{
+        try {
+            int selectedRow = filmTable.getSelectedRow();
+            if (selectedRow != -1) {
+                int showtimeId = (int) tableModel.getValueAt(selectedRow, 0);
 
-            int showtimeId = 0;
+                RemoveShowtimeRequest request = new RemoveShowtimeRequest();
+                request.id = showtimeId;
 
-//            view input form for showtimeId
-//            showtimeId = inputShowtimeId();
-//            lalu masukan ke variabel di atas
-
-            RemoveShowtimeRequest request = new RemoveShowtimeRequest();
-            request.id = showtimeId;
-            this.showtimeService.remove(request);
-
-//            view success message alert atau tampilan
-//            System.out.println("Showtime removed successfully");
-
-        }catch (ValidationException | SQLException e){
-//            view error message alert atau tampilan
-            System.out.println(e.getMessage());
+                this.showtimeService.remove(request);
+                tableModel.removeRow(selectedRow);
+                JOptionPane.showMessageDialog(null, "Showtime removed successfully!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Please select a showtime to delete.");
+            }
+        } catch (ValidationException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
     }
-
 }

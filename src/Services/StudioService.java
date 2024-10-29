@@ -111,6 +111,14 @@ public class StudioService {
 
     }
 
+    public Studio findById(int studioId) throws SQLException, ValidationException {
+        Studio studio = this.studioRepository.find(studioId);
+        if(studio == null){
+            throw new ValidationException("Studio not found");
+        }
+        return studio;
+    }
+
     public FindAllStudioResponse showAll() throws SQLException {
         Studio[] studios = this.studioRepository.findAll();
         FindAllStudioResponse response = new FindAllStudioResponse();
