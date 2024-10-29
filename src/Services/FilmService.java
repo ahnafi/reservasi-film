@@ -27,6 +27,7 @@ public class FilmService {
             }
 
             Film newFilm = new Film();
+            newFilm.id = request.id;
             newFilm.title = request.title;
             newFilm.genre = request.genre;
             newFilm.duration = request.duration;

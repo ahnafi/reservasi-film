@@ -27,9 +27,9 @@ public class PaymentRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     payment.id = generatedKeys.getInt(1);
-                    return payment;
                 }
             }
+            return payment;
         }
     }
 

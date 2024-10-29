@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ShowtimeRepository {
 
@@ -45,62 +47,46 @@ public class ShowtimeRepository {
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
             ResultSet res = statement.executeQuery();
 
-            res.last();
-            int rowCount = res.getRow();
-            res.beforeFirst();
+            // Menggunakan ArrayList untuk fleksibilitas ukuran
+            List<Showtime> showtimeList = new ArrayList<>();
 
-            if(rowCount > 0) {
-                Showtime[] result = new Showtime[rowCount];
-                int i = 0;
+            while (res.next()) {
+                Showtime showtime = new Showtime();
+                showtime.id = res.getInt("Showtime_ID");
+                showtime.filmId = res.getInt("Film_ID");
+                showtime.studioId = res.getInt("Studio_ID");
+                showtime.showtime = res.getString("Jam_Tayang");
 
-                while (res.next()) {
-                    Showtime showtime = new Showtime();
-                    showtime.id = res.getInt("Showtime_ID");
-                    showtime.filmId = res.getInt("Film_ID");
-                    showtime.studioId = res.getInt("Studio_ID");
-                    showtime.showtime = res.getString("Jam_Tayang");
-
-                    result[i] = showtime;
-                    i++;
-                }
-
-                return result;
-            }else {
-                return new Showtime[0];
+                showtimeList.add(showtime);  // Tambah ke list
             }
+
+            // Mengonversi ArrayList ke array Showtime[]
+            return showtimeList.toArray(new Showtime[0]);
         }
     }
 
     public Showtime[] findByStudioId(int studioId) throws SQLException {
-        String sql = "SELECT Showtime_ID,Film_ID,Studio_ID,Jam_Tayang FROM showtime WHERE Studio_ID = ? ORDER BY Jam_Tayang ASC";
+        String sql = "SELECT Showtime_ID, Film_ID, Studio_ID, Jam_Tayang FROM showtime WHERE Studio_ID = ? ORDER BY Jam_Tayang ASC";
 
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
             statement.setInt(1, studioId);
             ResultSet res = statement.executeQuery();
 
-            res.last();
-            int rowCount = res.getRow();
-            res.beforeFirst();
+            // Menggunakan ArrayList untuk fleksibilitas ukuran
+            List<Showtime> showtimeList = new ArrayList<>();
 
-            if(rowCount > 0) {
-                Showtime[] result = new Showtime[rowCount];
-                int i = 0;
+            while (res.next()) {
+                Showtime showtime = new Showtime();
+                showtime.id = res.getInt("Showtime_ID");
+                showtime.filmId = res.getInt("Film_ID");
+                showtime.studioId = res.getInt("Studio_ID");
+                showtime.showtime = res.getString("Jam_Tayang");
 
-                while (res.next()) {
-                    Showtime showtime = new Showtime();
-                    showtime.id = res.getInt("Showtime_ID");
-                    showtime.filmId = res.getInt("Film_ID");
-                    showtime.studioId = res.getInt("Studio_ID");
-                    showtime.showtime = res.getString("Jam_Tayang");
-
-                    result[i] = showtime;
-                    i++;
-                }
-
-                return result;
-            }else {
-                return new Showtime[0];
+                showtimeList.add(showtime);  // Tambah ke list
             }
+
+            // Mengonversi ArrayList ke array Showtime[]
+            return showtimeList.toArray(new Showtime[0]);
         }
     }
 

@@ -27,9 +27,9 @@ public class ReservationRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     reservation.id = generatedKeys.getInt(1);
-                    return reservation;
                 }
             }
+            return reservation;
         }
     }
 

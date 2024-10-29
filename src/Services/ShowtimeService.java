@@ -10,13 +10,10 @@ import Model.RemoveShowtimeRequest;
 import Repository.FilmRepository;
 import Repository.ShowtimeRepository;
 import Repository.StudioRepository;
-
 import java.sql.SQLException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-
 import Exception.ValidationException;
-
 
 public class ShowtimeService {
 

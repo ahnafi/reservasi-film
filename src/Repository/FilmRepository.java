@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import Domain.Film;
 
@@ -49,29 +51,19 @@ public class FilmRepository {
         try (PreparedStatement statement = conn.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
 
-            rs.last(); // Pindah ke baris terakhir untuk mendapatkan jumlah baris
-            int rowCount = rs.getRow();
-            rs.beforeFirst(); // Kembali ke baris pertama
+            List<Film> films = new ArrayList<Film>();
 
-            if (rowCount > 0) {
-                Film[] result = new Film[rowCount];
-                int i = 0;
+            while (rs.next()) {
+                Film film = new Film();
+                film.id = rs.getInt("Film_ID");
+                film.title = rs.getString("Judul");
+                film.genre = rs.getString("Genre");
+                film.duration = rs.getInt("Durasi");
 
-                while (rs.next()) {
-                    Film film = new Film();
-                    film.id = rs.getInt("Film_ID");
-                    film.title = rs.getString("Judul");
-                    film.genre = rs.getString("Genre");
-                    film.duration = rs.getInt("Durasi");
-
-                    result[i] = film;
-                    i++;
-                }
-
-                return result;
-            } else {
-                return new Film[0];
+                films.add(film);
             }
+
+            return films.toArray(new Film[0]);
         }
     }
 

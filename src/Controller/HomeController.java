@@ -14,11 +14,13 @@ import java.sql.SQLException;
 
 import Exception.ValidationException;
 
-public class ShowtimeController {
+import javax.swing.JFrame;
+
+public class HomeController extends JFrame {
 
     private ShowtimeService showtimeService;
 
-    public ShowtimeController() {
+    public HomeController() {
         Connection connection = Database.getConnection();
         ShowtimeRepository showtimeRepository = new ShowtimeRepository(connection);
         FilmRepository filmRepository = new FilmRepository(connection);

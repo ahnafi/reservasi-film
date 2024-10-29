@@ -10,11 +10,12 @@ import Services.ReservationService;
 import Services.ShowtimeService;
 import Services.TicketService;
 
+import javax.swing.JFrame;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 
-public class ReservationController {
+public class ReservationController extends JFrame {
 
     private ReservationService reservationService;
     private ShowtimeService showtimeService;
