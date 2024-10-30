@@ -33,7 +33,7 @@ public class ShowtimeService {
         this.studioRepository = studioRepository;
     }
 
-    public void create(CreateShowtimeRequest request) throws ValidationException, SQLException {
+    public Showtime create(CreateShowtimeRequest request) throws ValidationException, SQLException {
         validateCreateShowtimeRequest(request);
 
         try {
@@ -70,9 +70,10 @@ public class ShowtimeService {
             }
 
             newShowtime.showtime = nextAvailableTime.format(formatter);
-            this.showtimeRepository.save(newShowtime);
+            Showtime res = this.showtimeRepository.save(newShowtime);
 
             Database.commitTransaction();
+            return res;
         } catch (SQLException e) {
             Database.rollbackTransaction();
             throw e;
@@ -104,7 +105,7 @@ public class ShowtimeService {
                 Film film = this.filmRepository.findById(showtime.filmId);
                 LocalTime showtimeTime = LocalTime.parse(showtime.showtime, formatter);
 
-                if (showtimeTime.isBefore(nextAvailableTime)) {
+                if (showtimeTime.isBefore(nextAvailableTime) || showtime == showtimes[0]) {
                     showtimeTime = nextAvailableTime;
                 }
 
@@ -138,6 +139,19 @@ public class ShowtimeService {
 
     }
 
+    public Showtime getShowtimeById(int showtimeID) throws SQLException, ValidationException {
+        if(showtimeID < 0){
+            throw new ValidationException("Showtime ID is required");
+        }
+
+        Showtime showtime = this.showtimeRepository.find(showtimeID);
+        if(showtime == null){
+            throw new ValidationException("Showtime not found");
+        }
+
+        return showtime;
+    }
+
     public FindAllShowtimeResponse getAllShowtimes() throws SQLException {
         Showtime[] showtimes = this.showtimeRepository.getAll();
 
@@ -168,5 +182,14 @@ public class ShowtimeService {
         }
 
     }
+
+    public int getStudioCapacity(int studioId) throws SQLException, ValidationException {
+        Studio studio = this.studioRepository.find(studioId);
+        if (studio == null) {
+            throw new ValidationException("Studio not found");
+        }
+        return studio.capacity;
+    }
+
 
 }

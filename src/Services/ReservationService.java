@@ -179,4 +179,9 @@ public class ReservationService {
         }
     }
 
+    public Reservation[] getReservedChairsByShowtime(int showtimeId) throws SQLException {
+        return this.reservationRepository.findByShowtime(showtimeId);
+    }
+
+
 }

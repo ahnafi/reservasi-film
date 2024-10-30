@@ -2,10 +2,9 @@ package Repository;
 
 import Domain.Reservation;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReservationRepository {
 
@@ -17,7 +16,7 @@ public class ReservationRepository {
 
     public Reservation save(Reservation reservation) throws SQLException {
         String sql = "INSERT INTO reservation (Showtime_ID, Nomor_Kursi, Status) VALUES (?, ?, ?)";
-        try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, reservation.showtimeId);
             statement.setInt(2, reservation.chairNumber);
             statement.setString(3, reservation.status);
@@ -27,6 +26,8 @@ public class ReservationRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     reservation.id = generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Creating reservation failed, no ID obtained.");
                 }
             }
             return reservation;
@@ -97,33 +98,25 @@ public class ReservationRepository {
     public Reservation[] findByShowtime(int showtimeId) throws SQLException {
         String sql = "SELECT Reservation_ID, Showtime_ID, Nomor_Kursi, Status FROM reservation WHERE Showtime_ID = ?";
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
-            statement.setInt(1,showtimeId);
+            statement.setInt(1, showtimeId);
             ResultSet rs = statement.executeQuery();
 
-            rs.last(); // Pindah ke baris terakhir untuk mendapatkan jumlah baris
-            int rowCount = rs.getRow();
-            rs.beforeFirst(); // Kembali ke baris pertama
+            List<Reservation> res = new ArrayList<Reservation>();
 
-            if (rowCount > 0) {
-                Reservation[] result = new Reservation[rowCount];
-                int i = 0;
+            while (rs.next()) {
+                Reservation reservation = new Reservation();
+                reservation.id = rs.getInt("Reservation_ID");
+                reservation.showtimeId = rs.getInt("Showtime_ID");
+                reservation.chairNumber = rs.getInt("Nomor_Kursi");
+                reservation.status = rs.getString("Status");
 
-                while (rs.next()) {
-                    Reservation reservation = new Reservation();
-                    reservation.id = rs.getInt("Reservation_ID");
-                    reservation.showtimeId = rs.getInt("Showtime_ID");
-                    reservation.chairNumber = rs.getInt("Nomor_Kursi");
-                    reservation.status = rs.getString("Status");
-
-                    result[i++] = reservation;
-                }
-
-                return result;
-            } else {
-                return new Reservation[0]; // Kembalikan array kosong jika tidak ada reservasi
+                res.add(reservation);
             }
+
+            return res.toArray(new Reservation[0]);
         }
     }
+
 
     public void delete(int id) throws SQLException {
         String sql = "DELETE FROM reservation WHERE Reservation_ID = ?";

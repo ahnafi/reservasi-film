@@ -25,7 +25,6 @@ public class HomeView extends JFrame {
     private JButton btnDelete, btnAddShowtime, btnSortShowtime;
     private JButton btnShowFilmView;
     private JButton btnShowStudioView;
-    private JButton btnShowReservationView;
 
     private ShowtimeService showtimeService;
 
@@ -37,7 +36,7 @@ public class HomeView extends JFrame {
         this.showtimeService = new ShowtimeService(showtimeRepository, filmRepository, studioRepository);
 
         setTitle("Showtime Film");
-        setSize(600, 400);
+        setSize(1000, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -51,14 +50,12 @@ public class HomeView extends JFrame {
         btnDelete = new JButton("Delete Selected Showtime");
         btnAddShowtime = new JButton("Add Showtime");
         btnSortShowtime = new JButton("Sort Showtime");
-        btnShowReservationView = new JButton("Open Reservation View");
 
         btnShowFilmView = new JButton("Show Film List");
         btnShowStudioView = new JButton("Show Studio List");
 
         buttonPanel.add(btnShowFilmView);
         buttonPanel.add(btnShowStudioView);
-        buttonPanel.add(btnShowReservationView);
 
         btnShowFilmView.addActionListener(new ActionListener() {
             @Override
@@ -73,14 +70,6 @@ public class HomeView extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 StudioView studioView = new StudioView();
                 studioView.setVisible(true);
-            }
-        });
-
-        btnShowReservationView.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ReservationView reservationView = new ReservationView();
-                reservationView.setVisible(true);
             }
         });
 
@@ -135,7 +124,10 @@ public class HomeView extends JFrame {
             request.filmId = filmId;
             request.studioId = studioId;
 
-            this.showtimeService.create(request);
+            Showtime show = this.showtimeService.create(request);
+
+            tableModel.addRow(new Object[] {show.id,show.filmId,show.studioId,show.showtime});
+
             JOptionPane.showMessageDialog(null, "Showtime added successfully!");
 
         } catch (ValidationException | SQLException e) {
