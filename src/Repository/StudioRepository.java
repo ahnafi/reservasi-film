@@ -58,7 +58,7 @@ public class StudioRepository {
 
                     return studio;
                 } else {
-                    return null; 
+                    return null;
                 }
             }
         }
@@ -91,6 +91,24 @@ public class StudioRepository {
         try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             statement.executeUpdate();
+        }
+    }
+    public Studio findById(int id) throws SQLException {
+        String sql = "SELECT Studio_ID, Nama_Studio, Kapasitas FROM studio WHERE Studio_ID = ?";
+
+        try (PreparedStatement statement = this.connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            try (ResultSet res = statement.executeQuery()) {
+                if (res.next()) {
+                    Studio studio = new Studio();
+                    studio.id = res.getInt("Studio_ID");
+                    studio.name = res.getString("Nama_Studio");
+                    studio.capacity = res.getInt("Kapasitas");
+                    return studio;
+                } else {
+                    return null; // Return null if not found
+                }
+            }
         }
     }
 

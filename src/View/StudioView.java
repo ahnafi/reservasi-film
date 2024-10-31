@@ -37,6 +37,7 @@ public class StudioView extends JFrame {
         showAll(); // Mengisi tabel dengan data studio
 
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(0x903333));
         btnAddStudio = new JButton("Add Studio");
         btnEditStudio = new JButton("Edit Selected Studio");
         btnDeleteStudio = new JButton("Delete Selected Studio");
@@ -98,53 +99,113 @@ public class StudioView extends JFrame {
     }
 
     private void addStudio() {
-        try {
-            int id = Integer.parseInt(JOptionPane.showInputDialog("Enter Studio ID:"));
-            String name = JOptionPane.showInputDialog("Enter Studio Name:");
-            int capacity = Integer.parseInt(JOptionPane.showInputDialog("Enter Studio Capacity:"));
+        JTextField idField = new JTextField(10);
+        JTextField nameField = new JTextField(10);
+        JTextField capacityField = new JTextField(10);
 
-            AddStudioRequest request = new AddStudioRequest();
-            request.id = id;
-            request.name = name;
-            request.capacity = capacity;
+        // Membuat panel untuk form input
+        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+        panel.add(new JLabel("Studio ID:"));
+        panel.add(idField);
+        panel.add(new JLabel("Studio Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("Studio Capacity:"));
+        panel.add(capacityField);
 
-            AddStudioResponse response = this.studioService.add(request);
-            Studio studio = response.studio;
+        int result = JOptionPane.showConfirmDialog(null, panel, "Add Studio",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
 
-            tableModel.addRow(new Object[]{studio.id, studio.name, studio.capacity});
-            JOptionPane.showMessageDialog(null, "Studio " + studio.name + " added successfully!");
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                int id = Integer.parseInt(idField.getText().trim());
+                String name = nameField.getText().trim();
+                int capacity = Integer.parseInt(capacityField.getText().trim());
 
-        } catch (ValidationException | SQLException | NumberFormatException err) {
-            JOptionPane.showMessageDialog(null, "Error: " + err.getMessage());
+                // Validasi input sederhana
+                if (name.isEmpty() || capacity <= 0) {
+                    throw new ValidationException("Name tidak boleh kosong dan kapasitas harus lebih dari 0");
+                }
+
+                // Membuat request dan memanggil service
+                AddStudioRequest request = new AddStudioRequest();
+                request.id = id;
+                request.name = name;
+                request.capacity = capacity;
+
+                AddStudioResponse response = this.studioService.add(request);
+                Studio studio = response.studio;
+
+                // Tambahkan ke tabel
+                tableModel.addRow(new Object[]{studio.id, studio.name, studio.capacity});
+                JOptionPane.showMessageDialog(null, "Studio " + studio.name + " added successfully!");
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "ID dan kapasitas harus berupa angka");
+            } catch (ValidationException | SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
         }
     }
 
     private void updateStudio(int studioId) {
         try {
-            String name = JOptionPane.showInputDialog("Edit Name:");
-            int capacity = Integer.parseInt(JOptionPane.showInputDialog("Edit Capacity:"));
+            // Ambil data studio yang ada berdasarkan ID
+            Studio existingStudio = this.studioService.getStudioById(studioId);
 
-            UpdateStudioRequest request = new UpdateStudioRequest();
-            request.id = studioId;
-            request.name = name;
-            request.capacity = capacity;
+            // Membuat input fields dan isi dengan data sebelumnya
+            JTextField nameField = new JTextField(existingStudio.name, 10);
+            JTextField capacityField = new JTextField(String.valueOf(existingStudio.capacity), 10);
 
-            UpdateStudioResponse response = this.studioService.update(request);
-            Studio studio = response.studio;
+            // Membuat panel untuk form
+            JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));
+            panel.add(new JLabel("Studio Name:"));
+            panel.add(nameField);
+            panel.add(new JLabel("Studio Capacity:"));
+            panel.add(capacityField);
 
-            for (int i = 0; i < tableModel.getRowCount(); i++) {
-                if ((int) tableModel.getValueAt(i, 0) == studioId) {
-                    tableModel.setValueAt(studio.name, i, 1);
-                    tableModel.setValueAt(studio.capacity, i, 2);
-                    break;
+            int result = JOptionPane.showConfirmDialog(null, panel, "Update Studio",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
+
+            if (result == JOptionPane.OK_OPTION) {
+                // Ambil input baru dari pengguna
+                String name = nameField.getText().trim();
+                int capacity = Integer.parseInt(capacityField.getText().trim());
+
+                if (name.isEmpty() || capacity <= 0) {
+                    throw new ValidationException("Name tidak boleh kosong dan kapasitas harus lebih dari 0");
                 }
-            }
-            JOptionPane.showMessageDialog(null, "Studio " + studio.name + " updated successfully!");
 
-        } catch (ValidationException | SQLException | NumberFormatException err) {
-            JOptionPane.showMessageDialog(null, "Error: " + err.getMessage());
+                // Membuat request update
+                UpdateStudioRequest request = new UpdateStudioRequest();
+                request.id = studioId;
+                request.name = name;
+                request.capacity = capacity;
+
+                // Panggil service untuk update data
+                UpdateStudioResponse response = this.studioService.update(request);
+                Studio updatedStudio = response.studio;
+
+                // Update data di tabel
+                for (int i = 0; i < tableModel.getRowCount(); i++) {
+                    if ((int) tableModel.getValueAt(i, 0) == studioId) {
+                        tableModel.setValueAt(updatedStudio.name, i, 1);
+                        tableModel.setValueAt(updatedStudio.capacity, i, 2);
+                        break;
+                    }
+                }
+
+                JOptionPane.showMessageDialog(null,
+                        "Studio " + updatedStudio.name + " updated successfully!");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Capacity harus berupa angka");
+        } catch (ValidationException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
     }
+
 
     private void deleteStudio(int studioId) {
         try {

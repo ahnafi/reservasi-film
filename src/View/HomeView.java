@@ -13,6 +13,7 @@ import Services.ShowtimeService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,27 +37,58 @@ public class HomeView extends JFrame {
         this.showtimeService = new ShowtimeService(showtimeRepository, filmRepository, studioRepository);
 
         setTitle("Showtime Film");
-        setSize(1000, 400);
+        setSize(1000, 600); // Increased height for better layout
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
         tableModel = new DefaultTableModel(new String[]{"ID", "ID Film", "ID Studio", "Showtime"}, 0);
         filmTable = new JTable(tableModel);
+        filmTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        filmTable.setRowHeight(25);
+        filmTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        filmTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+        filmTable.getColumnModel().getColumn(1).setPreferredWidth(150);
+        filmTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+        filmTable.getColumnModel().getColumn(3).setPreferredWidth(200);
+
+        JTableHeader tableHeader = filmTable.getTableHeader();
+        tableHeader.setFont(new Font("Arial", Font.BOLD, 16));
+        tableHeader.setBackground(Color.LIGHT_GRAY);
+        tableHeader.setForeground(Color.BLACK);
 
         showtime();
 
+        // Sidebar Button Panel
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(144,51,51)); // 144,51,51
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setPreferredSize(new Dimension(220, getHeight())); // Lebar sidebar
 
-        btnDelete = new JButton("Delete Selected Showtime");
-        btnAddShowtime = new JButton("Add Showtime");
-        btnSortShowtime = new JButton("Sort Showtime");
+        btnDelete = createStyledButton("Delete Showtime");
+        btnAddShowtime = createStyledButton("Add Showtime");
+        btnSortShowtime = createStyledButton("Sort Showtime");
+        btnShowFilmView = createStyledButton("Show Film List");
+        btnShowStudioView = createStyledButton("Show Studio List");
 
-        btnShowFilmView = new JButton("Show Film List");
-        btnShowStudioView = new JButton("Show Studio List");
-
+        // Add buttons with spacing
+        buttonPanel.add(Box.createVerticalStrut(150));
         buttonPanel.add(btnShowFilmView);
+        buttonPanel.add(Box.createVerticalStrut(15));
         buttonPanel.add(btnShowStudioView);
+        buttonPanel.add(Box.createVerticalStrut(15));
+        buttonPanel.add(btnAddShowtime);
+        buttonPanel.add(Box.createVerticalStrut(15));
+        buttonPanel.add(btnSortShowtime);
+        buttonPanel.add(Box.createVerticalStrut(15));
+        buttonPanel.add(btnDelete);
+        buttonPanel.add(Box.createVerticalGlue()); // Push buttons to top, add glue at bottom
 
+        JScrollPane scrollPane = new JScrollPane(filmTable);
+        add(scrollPane, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.WEST);
+
+        // Button action listeners
         btnShowFilmView.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -72,12 +104,6 @@ public class HomeView extends JFrame {
                 studioView.setVisible(true);
             }
         });
-
-        buttonPanel.add(btnAddShowtime);
-        buttonPanel.add(btnSortShowtime);
-        buttonPanel.add(btnDelete);
-
-        JScrollPane scrollPane = new JScrollPane(filmTable);
 
         btnDelete.addActionListener(new ActionListener() {
             @Override
@@ -99,9 +125,21 @@ public class HomeView extends JFrame {
                 sortShowtime();
             }
         });
+    }
 
-        add(scrollPane, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setBackground(new Color(0xEB9E2A)); //warna background button
+        button.setForeground(Color.WHITE); // Warna teks putih
+        button.setFocusPainted(false);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setOpaque(true);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setMaximumSize(new Dimension(200, 40));
+        return button;
     }
 
     public void showtime() {
@@ -117,19 +155,31 @@ public class HomeView extends JFrame {
 
     public void addShowtime() {
         try {
-            int filmId = Integer.parseInt(JOptionPane.showInputDialog("Enter Film ID:"));
-            int studioId = Integer.parseInt(JOptionPane.showInputDialog("Enter Studio ID:"));
+            JTextField filmIdField = new JTextField(10);
+            JTextField studioIdField = new JTextField(10);
 
-            CreateShowtimeRequest request = new CreateShowtimeRequest();
-            request.filmId = filmId;
-            request.studioId = studioId;
+            JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));
+            panel.add(new JLabel("Enter Film ID:"));
+            panel.add(filmIdField);
+            panel.add(new JLabel("Enter Studio ID:"));
+            panel.add(studioIdField);
 
-            Showtime show = this.showtimeService.create(request);
+            int result = JOptionPane.showConfirmDialog(null, panel, "Add Showtime",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-            tableModel.addRow(new Object[] {show.id,show.filmId,show.studioId,show.showtime});
+            if (result == JOptionPane.OK_OPTION) {
+                int filmId = Integer.parseInt(filmIdField.getText().trim());
+                int studioId = Integer.parseInt(studioIdField.getText().trim());
 
-            JOptionPane.showMessageDialog(null, "Showtime added successfully!");
+                CreateShowtimeRequest request = new CreateShowtimeRequest();
+                request.filmId = filmId;
+                request.studioId = studioId;
 
+                Showtime show = this.showtimeService.create(request);
+                tableModel.addRow(new Object[]{show.id, show.filmId, show.studioId, show.showtime});
+
+                JOptionPane.showMessageDialog(null, "Showtime added successfully!");
+            }
         } catch (ValidationException | SQLException e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         } catch (NumberFormatException e) {
@@ -144,7 +194,7 @@ public class HomeView extends JFrame {
             this.showtimeService.sortShowtime(studioId);
             JOptionPane.showMessageDialog(null, "Showtimes updated and sorted successfully!");
 
-            FindAllShowtimeResponse response = this.showtimeService.getShowtimes(studioId);
+            FindAllShowtimeResponse response = this.showtimeService.getAllShowtimes();
             tableModel.setRowCount(0);
 
             for (Showtime showtime : response.showtimes) {

@@ -110,6 +110,17 @@ public class StudioService {
         }
 
     }
+    public Studio getStudioById(int studioId) throws ValidationException, SQLException {
+        if (studioId < 0) {
+            throw new ValidationException("Studio ID tidak valid");
+        }
+
+        Studio studio = this.studioRepository.findById(studioId); // Studio repository digunakan
+        if (studio == null) {
+            throw new ValidationException("Studio tidak ditemukan");
+        }
+        return studio;
+    }
 
     public Studio findById(int studioId) throws SQLException, ValidationException {
         Studio studio = this.studioRepository.find(studioId);

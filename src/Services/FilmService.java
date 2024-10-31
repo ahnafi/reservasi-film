@@ -2,6 +2,7 @@ package Services;
 
 import Config.Database;
 import Domain.Film;
+import Domain.Studio;
 import Model.*;
 import Repository.FilmRepository;
 import Exception.ValidationException;
@@ -80,6 +81,18 @@ public class FilmService {
             throw err;
         }
 
+    }
+
+    public Film getFilmById(int filmId) throws ValidationException, SQLException {
+        if (filmId < 0) {
+            throw new ValidationException("Film ID tidak valid");
+        }
+
+        Film film = this.filmRepository.findById(filmId);
+        if (film == null) {
+            throw new ValidationException("Film tidak ditemukan");
+        }
+        return film;
     }
 
     private void validateUpdateFilmRequest(UpdateFilmRequest request) throws ValidationException {

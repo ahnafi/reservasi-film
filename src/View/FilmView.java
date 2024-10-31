@@ -37,6 +37,7 @@ public class FilmView extends JFrame {
         showAll(); // Mengisi tabel dengan data film
 
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(0x903333));
         btnAddFilm = new JButton("Add Film");
         btnEditFilm = new JButton("Edit Selected Film");
         btnDeleteFilm = new JButton("Delete Selected Film");
@@ -98,58 +99,135 @@ public class FilmView extends JFrame {
     }
 
     private void addFilm() {
-        try {
-            int id = Integer.parseInt(JOptionPane.showInputDialog("Enter Film ID:"));
-            String title = JOptionPane.showInputDialog("Enter Film Title:");
-            String genre = JOptionPane.showInputDialog("Enter Film Genre:");
-            int duration = Integer.parseInt(JOptionPane.showInputDialog("Enter Film Duration:"));
+        // Membuat panel dengan layout grid untuk form input
+        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
 
-            SaveFilmRequest request = new SaveFilmRequest();
-            request.id = id;
-            request.title = title;
-            request.genre = genre;
-            request.duration = duration;
+        // Membuat komponen input
+        JTextField idField = new JTextField();
+        JTextField titleField = new JTextField();
+        JTextField genreField = new JTextField();
+        JTextField durationField = new JTextField();
 
-            SaveFilmResponse response = this.filmService.add(request);
-            Film film = response.film;
+        // Menambahkan label dan input field ke panel
+        panel.add(new JLabel("Film ID:"));
+        panel.add(idField);
+        panel.add(new JLabel("Film Title:"));
+        panel.add(titleField);
+        panel.add(new JLabel("Film Genre:"));
+        panel.add(genreField);
+        panel.add(new JLabel("Film Duration (minutes):"));
+        panel.add(durationField);
 
-            tableModel.addRow(new Object[]{film.id, film.title, film.genre, film.duration});
-            JOptionPane.showMessageDialog(null, "Film " + film.title + " added successfully!");
+        // Menampilkan form dalam dialog konfirmasi
+        int result = JOptionPane.showConfirmDialog(null, panel,
+                "Enter Film Details", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
 
-        } catch (ValidationException | SQLException | NumberFormatException err) {
-            JOptionPane.showMessageDialog(null, "Error: " + err.getMessage());
+        // Jika pengguna menekan OK, ambil dan proses inputnya
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                // Mengambil dan memvalidasi input
+                int id = Integer.parseInt(idField.getText().trim());
+                String title = titleField.getText().trim();
+                String genre = genreField.getText().trim();
+                int duration = Integer.parseInt(durationField.getText().trim());
+
+                // Membuat request dan memproses input
+                SaveFilmRequest request = new SaveFilmRequest();
+                request.id = id;
+                request.title = title;
+                request.genre = genre;
+                request.duration = duration;
+
+                // Menambahkan film melalui service
+                SaveFilmResponse response = this.filmService.add(request);
+                Film film = response.film;
+
+                // Memasukkan data film ke dalam tabel
+                tableModel.addRow(new Object[]{film.id, film.title, film.genre, film.duration});
+                JOptionPane.showMessageDialog(null, "Film " + film.title + " added successfully!");
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null,
+                        "Invalid input! Please enter valid numbers for ID and Duration.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (ValidationException | SQLException err) {
+                JOptionPane.showMessageDialog(null,
+                        "Error: " + err.getMessage(),
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Operation cancelled.");
         }
     }
 
     private void updateFilm(int filmId) {
         try {
-            String title = JOptionPane.showInputDialog("Edit Title:");
-            String genre = JOptionPane.showInputDialog("Edit Genre:");
-            int duration = Integer.parseInt(JOptionPane.showInputDialog("Edit Duration:"));
+            // Ambil data film berdasarkan ID
+            Film existingFilm = this.filmService.getFilmById(filmId);
 
-            UpdateFilmRequest request = new UpdateFilmRequest();
-            request.id = filmId;
-            request.title = title;
-            request.genre = genre;
-            request.duration = duration;
+            // Membuat panel untuk form input
+            JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
 
-            UpdateFilmResponse response = this.filmService.update(request);
-            Film film = response.film;
+            // Membuat input field dan mengisi nilai awal dengan data film yang ada
+            JTextField titleField = new JTextField(existingFilm.title);
+            JTextField genreField = new JTextField(existingFilm.genre);
+            JTextField durationField = new JTextField(String.valueOf(existingFilm.duration));
 
-            for (int i = 0; i < tableModel.getRowCount(); i++) {
-                if ((int) tableModel.getValueAt(i, 0) == filmId) {
-                    tableModel.setValueAt(film.title, i, 1);
-                    tableModel.setValueAt(film.genre, i, 2);
-                    tableModel.setValueAt(film.duration, i, 3);
-                    break;
+            // Menambahkan komponen ke panel
+            panel.add(new JLabel("Edit Title:"));
+            panel.add(titleField);
+            panel.add(new JLabel("Edit Genre:"));
+            panel.add(genreField);
+            panel.add(new JLabel("Edit Duration (minutes):"));
+            panel.add(durationField);
+
+            // Tampilkan form dalam dialog dengan tombol OK/Cancel
+            int result = JOptionPane.showConfirmDialog(null, panel,
+                    "Update Film", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (result == JOptionPane.OK_OPTION) {
+                // Ambil input baru dari user
+                String newTitle = titleField.getText().trim();
+                String newGenre = genreField.getText().trim();
+                int newDuration = Integer.parseInt(durationField.getText().trim());
+
+                // Buat request untuk update film
+                UpdateFilmRequest request = new UpdateFilmRequest();
+                request.id = filmId;
+                request.title = newTitle;
+                request.genre = newGenre;
+                request.duration = newDuration;
+
+                // Lakukan update melalui service
+                UpdateFilmResponse response = this.filmService.update(request);
+                Film updatedFilm = response.film;
+
+                // Update data di tabel
+                for (int i = 0; i < tableModel.getRowCount(); i++) {
+                    if ((int) tableModel.getValueAt(i, 0) == filmId) {
+                        tableModel.setValueAt(updatedFilm.title, i, 1);
+                        tableModel.setValueAt(updatedFilm.genre, i, 2);
+                        tableModel.setValueAt(updatedFilm.duration, i, 3);
+                        break;
+                    }
                 }
+                JOptionPane.showMessageDialog(null, "Film " + updatedFilm.title + " updated successfully!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Update cancelled.");
             }
-            JOptionPane.showMessageDialog(null, "Film " + film.title + " updated successfully!");
 
-        } catch (ValidationException | SQLException | NumberFormatException err) {
-            JOptionPane.showMessageDialog(null, "Error: " + err.getMessage());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null,
+                    "Invalid input! Please enter a valid number for duration.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (ValidationException | SQLException err) {
+            JOptionPane.showMessageDialog(null,
+                    "Error: " + err.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void deleteFilm(int filmId) {
         try {

@@ -13,6 +13,9 @@ import Repository.StudioRepository;
 import java.sql.SQLException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Comparator;
+
 import Exception.ValidationException;
 
 public class ShowtimeService {
@@ -93,25 +96,39 @@ public class ShowtimeService {
         try {
             Database.beginTransaction();
 
+            // Ambil semua showtime berdasarkan studio dan urutkan berdasarkan waktu tayang saat ini
             Showtime[] showtimes = this.showtimeRepository.findByStudioId(studioId);
 
             if (showtimes.length == 0) {
                 throw new ValidationException("No showtime found");
             }
 
+            // Urutkan showtimes berdasarkan waktu tayang yang ada
+            Arrays.sort(showtimes, Comparator.comparing(showtime -> LocalTime.parse(showtime.showtime, formatter)));
+
             LocalTime nextAvailableTime = openingTime;
 
             for (Showtime showtime : showtimes) {
                 Film film = this.filmRepository.findById(showtime.filmId);
-                LocalTime showtimeTime = LocalTime.parse(showtime.showtime, formatter);
 
-                if (showtimeTime.isBefore(nextAvailableTime) || showtime == showtimes[0]) {
+                // Jika waktu showtime saat ini sebelum nextAvailableTime, set showtime ke nextAvailableTime
+                LocalTime showtimeTime = LocalTime.parse(showtime.showtime, formatter);
+                if (showtimeTime.isBefore(nextAvailableTime)) {
                     showtimeTime = nextAvailableTime;
                 }
 
+                // Set showtime waktu tayang yang sudah disesuaikan
                 showtime.showtime = showtimeTime.format(formatter);
+
+                // Hitung waktu tayang berikutnya berdasarkan durasi film dan jeda waktu
                 nextAvailableTime = showtimeTime.plusMinutes(film.duration).plusMinutes(breakTimeMinutes);
 
+                // Pastikan waktu berikutnya tidak melewati waktu tutup studio
+                if (nextAvailableTime.isAfter(closingTime)) {
+                    throw new ValidationException("Cannot schedule showtime past closing time for studio " + studioId);
+                }
+
+                // Update showtime ke database
                 this.showtimeRepository.update(showtime);
             }
 
@@ -121,6 +138,7 @@ public class ShowtimeService {
             throw e;
         }
     }
+
 
     public FindAllShowtimeResponse getShowtimes(int StudioId) throws SQLException, ValidationException {
 
