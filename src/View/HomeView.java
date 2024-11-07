@@ -37,7 +37,7 @@ public class HomeView extends JFrame {
         this.showtimeService = new ShowtimeService(showtimeRepository, filmRepository, studioRepository);
 
         setTitle("Showtime Film");
-        setSize(1000, 600); // Increased height for better layout
+        setSize(1000, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -82,7 +82,7 @@ public class HomeView extends JFrame {
         buttonPanel.add(btnSortShowtime);
         buttonPanel.add(Box.createVerticalStrut(15));
         buttonPanel.add(btnDelete);
-        buttonPanel.add(Box.createVerticalGlue()); // Push buttons to top, add glue at bottom
+        buttonPanel.add(Box.createVerticalGlue());
 
         JScrollPane scrollPane = new JScrollPane(filmTable);
         add(scrollPane, BorderLayout.CENTER);
@@ -130,7 +130,7 @@ public class HomeView extends JFrame {
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setBackground(new Color(0xEB9E2A)); //warna background button
+        button.setBackground(new Color(235,158,42)); //warna background button 235 158 42
         button.setForeground(Color.WHITE); // Warna teks putih
         button.setFocusPainted(false);
         button.setFont(new Font("Arial", Font.BOLD, 14));

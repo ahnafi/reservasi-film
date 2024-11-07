@@ -37,7 +37,7 @@ public class FilmView extends JFrame {
         showAll(); // Mengisi tabel dengan data film
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(0x903333));
+        buttonPanel.setBackground(new Color(144,51,51));
         btnAddFilm = new JButton("Add Film");
         btnEditFilm = new JButton("Edit Selected Film");
         btnDeleteFilm = new JButton("Delete Selected Film");

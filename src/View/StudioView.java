@@ -37,7 +37,7 @@ public class StudioView extends JFrame {
         showAll(); // Mengisi tabel dengan data studio
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(0x903333));
+        buttonPanel.setBackground(new Color(144,51,51));
         btnAddStudio = new JButton("Add Studio");
         btnEditStudio = new JButton("Edit Selected Studio");
         btnDeleteStudio = new JButton("Delete Selected Studio");
